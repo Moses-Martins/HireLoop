@@ -13,17 +13,16 @@ import(
 
 
 type apiConfig struct {
-
+	JwtSecret string
 	DB *database.Queries
-	
 }
 
-
+ 
 func main() {
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
 	port := os.Getenv("PORT")
-
+	jwtSecret := os.Getenv("SECRET")
 
 
 
@@ -37,11 +36,13 @@ func main() {
 
 	apiCfg := apiConfig {
 		DB: dbQueries,
+		JwtSecret: jwtSecret,
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/api/users", apiCfg.CreateUsers).Methods("POST")
-
+	router.HandleFunc("/api/auth/register", apiCfg.CreateUsers).Methods("POST")
+	router.HandleFunc("/api/auth/login", apiCfg.Login).Methods("POST")
+	router.HandleFunc("/api/auth/me", apiCfg.Me).Methods("GET")
 
 
 	srv := &http.Server{
