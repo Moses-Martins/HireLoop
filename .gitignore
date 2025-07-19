@@ -1,0 +1,35 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# Output of go build
+/build/
+/bin/
+/dist/
+
+# Vendor directory (when using `go mod vendor`)
+/vendor/
+
+# Environment variable files
+.env
+.env.*
+
+# Logs
+*.log
+
+# IDE / editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+
+# MacOS system files
+.DS_Store
+
+# Node modules (if you're using a frontend in the same repo)
+node_modules/
