@@ -21,7 +21,6 @@ func (cfg *apiConfig) GoogleLogin(w http.ResponseWriter, req *http.Request) {
 }
 
 // Handler to handle the callback from Google
-// Handler to handle the callback from Google
 func (cfg *apiConfig) GoogleCallback(w http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
 	code := req.URL.Query().Get("code")
@@ -48,12 +47,20 @@ func (cfg *apiConfig) GoogleCallback(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	hashedPass, err := auth.HashPassword("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
+	if err != nil {
+		log.Printf("Error Hashing Password: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+	
+
 	Information, err := cfg.DB.GetUserByEmail(req.Context(), userInfo.Email)
 	if err != nil {
     	userDb, err := cfg.DB.CreateUser(req.Context(), database.CreateUserParams{		
 			Name:  userInfo.Name,  
 			Email:	userInfo.Email,
-			HashedPassword: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",    
+			HashedPassword: hashedPass,    
 			Role:	"applicant",
 		})
 		if err != nil {
