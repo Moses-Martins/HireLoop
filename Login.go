@@ -48,37 +48,14 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, req *http.Request) {
 	}
 
 
-	UserDb, err := cfg.DB.GetUsers(req.Context())
+	respBodyInitial, err := cfg.DB.GetUserByEmail(req.Context(), params.Email)
 	if err != nil {
-    	http.Error(w, "Cannot Retrieve Users", http.StatusNotFound)
-        return
-	}
-
-
-	dbToStruct := make([]User, 0, len(UserDb))
-    for _, dbUser := range UserDb {
-        userResp := User{
-            ID:        dbUser.ID,
-            CreatedAt: dbUser.CreatedAt,
-            UpdatedAt: dbUser.UpdatedAt,
-			Name: dbUser.Name,
-            Email:      dbUser.Email,
-			Password: dbUser.HashedPassword,
-			Role: dbUser.Role,
-        }
-        dbToStruct = append(dbToStruct, userResp)
-    }
-
-
-	respBodyInitial, exist := findUserByEmail(dbToStruct, params.Email)
-	if exist != true {
-		w.WriteHeader(401)
+    	w.WriteHeader(401)
 		w.Write([]byte("Incorrect email (Email cannot be found)"))
 		return
 	}
 
-
-	err = auth.CheckPasswordHash(params.Password, respBodyInitial.Password)
+	err = auth.CheckPasswordHash(params.Password, respBodyInitial.HashedPassword)
 	if err != nil {
 		w.WriteHeader(401)
 		w.Write([]byte("Incorrect password"))
@@ -125,12 +102,3 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, req *http.Request) {
 
 }
 
-
-func findUserByEmail(users []User, email string) (User, bool) {
-    for _, user := range users {
-        if user.Email == email {
-            return user, true // found
-        }
-    }
-    return User{}, false // not found
-}
