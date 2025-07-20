@@ -10,7 +10,7 @@ import (
 )
 
 const getAllJobs = `-- name: GetAllJobs :many
-SELECT id, title, description, location, type, salary, employer_id FROM jobs
+SELECT id, created_at, updated_at, title, description, location, type, salary, employer_id FROM jobs
 `
 
 func (q *Queries) GetAllJobs(ctx context.Context) ([]Job, error) {
@@ -24,6 +24,8 @@ func (q *Queries) GetAllJobs(ctx context.Context) ([]Job, error) {
 		var i Job
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.Title,
 			&i.Description,
 			&i.Location,

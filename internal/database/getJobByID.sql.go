@@ -12,7 +12,7 @@ import (
 )
 
 const getJobsByID = `-- name: GetJobsByID :one
-SELECT id, title, description, location, type, salary, employer_id FROM jobs
+SELECT id, created_at, updated_at, title, description, location, type, salary, employer_id FROM jobs
 WHERE id = $1
 `
 
@@ -21,6 +21,8 @@ func (q *Queries) GetJobsByID(ctx context.Context, id uuid.UUID) (Job, error) {
 	var i Job
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Title,
 		&i.Description,
 		&i.Location,

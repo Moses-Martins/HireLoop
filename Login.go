@@ -28,6 +28,8 @@ type User struct {
 
 type UserDisplayed struct {
 	Name string `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
 	Role string `json:"role"`
 	Token string `json:"token"`
@@ -84,6 +86,8 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, req *http.Request) {
 
 	respBody := UserDisplayed{
 		Name: respBodyInitial.Name,
+		CreatedAt: respBodyInitial.CreatedAt,
+		UpdatedAt: respBodyInitial.UpdatedAt,
 		Email: respBodyInitial.Email,
 		Role: respBodyInitial.Role,
 		Token: token,

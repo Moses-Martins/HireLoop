@@ -12,9 +12,11 @@ import (
 )
 
 const createJobs = `-- name: CreateJobs :one
-INSERT INTO jobs (id, title, description, location, type, salary, employer_id)
+INSERT INTO jobs (id, created_at, updated_at, title, description, location, type, salary, employer_id)
 VALUES (
     gen_random_uuid(),
+    NOW(),
+    NOW(),
     $1,
     $2,
     $3,
@@ -22,7 +24,7 @@ VALUES (
     $5, 
     $6
 )
-RETURNING id, title, description, location, type, salary, employer_id
+RETURNING id, created_at, updated_at, title, description, location, type, salary, employer_id
 `
 
 type CreateJobsParams struct {
@@ -46,6 +48,8 @@ func (q *Queries) CreateJobs(ctx context.Context, arg CreateJobsParams) (Job, er
 	var i Job
 	err := row.Scan(
 		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Title,
 		&i.Description,
 		&i.Location,

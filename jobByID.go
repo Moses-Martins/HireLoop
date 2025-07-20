@@ -40,8 +40,7 @@ func (cfg *apiConfig) getJobByID(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Cannot Retrieve Job", http.StatusNotFound)
 		return
 	}
-
-
+ 
 	data, err := json.Marshal(respBody)
 		if err != nil {
 			log.Printf("Error marshalling JSON: %s", err)

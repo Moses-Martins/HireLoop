@@ -6,6 +6,7 @@ import (
 	"log"
 	"reflect"
 	"errors"
+	"time"
 	"strings"
 	"github.com/google/uuid"
 	"github.com/Moses-Martins/HireLoop/internal/database"
@@ -23,6 +24,8 @@ type job struct {
 
 type jobs struct {
     ID uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
    	Title string `json:"title"`
     Description string `json:"description"`
     Location string `json:"location"`
@@ -98,6 +101,8 @@ func (cfg *apiConfig) createJob(w http.ResponseWriter, req *http.Request) {
 
 	respBody := jobs{
 		ID: jobDb.ID,
+		CreatedAt: jobDb.CreatedAt,
+		UpdatedAt: jobDb.UpdatedAt,
 		Title: jobDb.Title,
 		Description: jobDb.Description,
 		Location: jobDb.Location,
