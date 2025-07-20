@@ -67,6 +67,7 @@ func main() {
 	router.HandleFunc("/api/auth/me", apiCfg.Me).Methods("GET")
 	router.HandleFunc("/api/jobs", apiCfg.createJob).Methods("POST")
 	router.HandleFunc("/api/jobs", apiCfg.getAllJobs).Methods("GET")
+	router.HandleFunc("/api/jobs/{id}", apiCfg.getJobByID).Methods("GET")
 	
 
 	srv := &http.Server{
