@@ -25,7 +25,7 @@ type Job struct {
 	Description string
 	Location    string
 	Type        string
-	Salary      string
+	Salary      float32
 	EmployerID  uuid.UUID
 }
 

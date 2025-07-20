@@ -65,7 +65,9 @@ func main() {
 	router.HandleFunc("/api/auth/google/login", apiCfg.GoogleLogin).Methods("GET")
 	router.HandleFunc("/api/auth/google/callback", apiCfg.GoogleCallback).Methods("GET")
 	router.HandleFunc("/api/auth/me", apiCfg.Me).Methods("GET")
-
+	router.HandleFunc("/api/jobs", apiCfg.createJob).Methods("POST")
+	router.HandleFunc("/api/jobs", apiCfg.getAllJobs).Methods("GET")
+	
 
 	srv := &http.Server{
 		Handler: router,

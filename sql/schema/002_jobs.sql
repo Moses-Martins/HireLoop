@@ -4,8 +4,8 @@ CREATE TABLE jobs (
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     location TEXT NOT NULL,
-    type TEXT UNIQUE NOT NULL,
-    salary DECIMAL(10,2) NOT NULL,
+    type TEXT NOT NULL,
+    salary REAL NOT NULL,
     employer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE
 );
 
