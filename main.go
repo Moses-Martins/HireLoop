@@ -73,6 +73,8 @@ func main() {
 	}
 
 	router := mux.NewRouter()
+	fs := http.FileServer(http.Dir("./assets"))
+    router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", fs))
 	router.HandleFunc("/api/auth/register", apiCfg.CreateUsers).Methods("POST")
 	router.HandleFunc("/api/auth/login", apiCfg.Login).Methods("POST")
 	router.HandleFunc("/api/auth/google/login", apiCfg.GoogleLogin).Methods("GET")
@@ -84,6 +86,7 @@ func main() {
 	router.HandleFunc("/api/jobs/{id}", apiCfg.updateJobByID).Methods("PUT")
 	router.HandleFunc("/api/jobs/{id}", apiCfg.deleteJobByID).Methods("DELETE")
 	router.HandleFunc("/api/jobs/{id}/apply", apiCfg.applyForJobs).Methods("POST")
+	router.HandleFunc("/api/employers/{id}/applications", apiCfg.getAllApp).Methods("GET")
 	
 
 	srv := &http.Server{

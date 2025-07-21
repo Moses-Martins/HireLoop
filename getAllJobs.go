@@ -24,7 +24,7 @@ func (cfg *apiConfig) getAllJobs(w http.ResponseWriter, req *http.Request) {
 
 	JobDb, err := cfg.DB.GetAllJobs(req.Context())
 	if err != nil {
-    	http.Error(w, "Cannot Retrieve Chirps", http.StatusNotFound)
+    	http.Error(w, "Cannot Retrieve Jobs", http.StatusNotFound)
         return
 	}
 

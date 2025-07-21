@@ -151,7 +151,7 @@ func (cfg *apiConfig) applyForJobs(w http.ResponseWriter, req *http.Request) {
 	updated, err := cfg.DB.GetApplyJobs(req.Context(), Applied.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Cannot get video"))
+		w.Write([]byte("Cannot get resume"))
 		return
 	}
 
