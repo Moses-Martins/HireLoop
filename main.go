@@ -7,6 +7,7 @@ import(
 	"database/sql"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"github.com/google/uuid"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -16,10 +17,19 @@ import(
 
 
 type apiConfig struct {
+	port string
 	JwtSecret string
 	DB *database.Queries
 	GoogleOauthConfig *oauth2.Config
+	assetsRoot       string
 }
+
+type resume struct {
+	data      []byte
+	mediaType string
+}
+
+var applicantResume = map[uuid.UUID]resume{}
 
  
 func main() {
@@ -27,6 +37,7 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	port := os.Getenv("PORT")
 	jwtSecret := os.Getenv("SECRET")
+	assetsRoot := os.Getenv("ASSETS_ROOT")
 	
 	redirectURL :=  os.Getenv("GOOGLE_REDIRECT_URL")
 	clientID :=     os.Getenv("GOOGLE_CLIENT_ID")
@@ -48,8 +59,10 @@ func main() {
 	dbQueries := database.New(db)
 
 	apiCfg := apiConfig {
+		port: port,
 		DB: dbQueries,
 		JwtSecret: jwtSecret,
+		assetsRoot: assetsRoot,
 		GoogleOauthConfig: &oauth2.Config{
 			RedirectURL: redirectURL,
 			ClientID:    clientID,
@@ -70,6 +83,7 @@ func main() {
 	router.HandleFunc("/api/jobs/{id}", apiCfg.getJobByID).Methods("GET")
 	router.HandleFunc("/api/jobs/{id}", apiCfg.updateJobByID).Methods("PUT")
 	router.HandleFunc("/api/jobs/{id}", apiCfg.deleteJobByID).Methods("DELETE")
+	router.HandleFunc("/api/jobs/{id}/apply", apiCfg.applyForJobs).Methods("POST")
 	
 
 	srv := &http.Server{

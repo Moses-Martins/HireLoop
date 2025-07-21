@@ -90,6 +90,8 @@ func (cfg *apiConfig) GoogleCallback(w http.ResponseWriter, req *http.Request) {
 
 		respBody := UserDisplayed{
 			Name: userDb.Name,
+			CreatedAt: userDb.CreatedAt,
+			UpdatedAt: userDb.UpdatedAt,
 			Email: userDb.Email,
 			Role: userDb.Role,
 			Token: loginToken,
