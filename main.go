@@ -87,6 +87,7 @@ func main() {
 	router.HandleFunc("/api/jobs/{id}", apiCfg.deleteJobByID).Methods("DELETE")
 	router.HandleFunc("/api/jobs/{id}/apply", apiCfg.applyForJobs).Methods("POST")
 	router.HandleFunc("/api/employers/{id}/applications", apiCfg.getAllApp).Methods("GET")
+	router.HandleFunc("/api/applications/{id}", apiCfg.viewSingleApp).Methods("GET")
 	
 
 	srv := &http.Server{

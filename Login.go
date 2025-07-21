@@ -64,7 +64,7 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	token, err := auth.MakeJWT(respBodyInitial.ID, cfg.JwtSecret, time.Duration(3600) * time.Second)
+	token, err := auth.MakeJWT(respBodyInitial.ID, cfg.JwtSecret, time.Duration(43200) * time.Second)
 	if err != nil {
 		log.Printf("Cannot generate token %s", err)
 		w.WriteHeader(500)

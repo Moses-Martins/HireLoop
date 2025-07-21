@@ -32,6 +32,8 @@ func (cfg *apiConfig) getAllJobs(w http.ResponseWriter, req *http.Request) {
     for _, dbjob := range JobDb {
         jobResp := jobs{
            	ID: dbjob.ID,
+			CreatedAt: dbjob.CreatedAt,
+			UpdatedAt: dbjob.UpdatedAt,
 			Title: dbjob.Title,
 			Description: dbjob.Description,
 			Location: dbjob.Location,

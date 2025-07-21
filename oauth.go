@@ -110,7 +110,7 @@ func (cfg *apiConfig) GoogleCallback(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	loginToken, err := auth.MakeJWT(Information.ID, cfg.JwtSecret, time.Duration(3600) * time.Second)
+	loginToken, err := auth.MakeJWT(Information.ID, cfg.JwtSecret, time.Duration(43200) * time.Second)
 	if err != nil {
 		log.Printf("Cannot generate token %s", err)
 		w.WriteHeader(500)
