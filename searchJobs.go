@@ -9,7 +9,6 @@ import (
 )
 
 
-
 func (cfg *apiConfig) searchJobs(w http.ResponseWriter, req *http.Request) {
 	str := req.URL.Query().Get("keyword")
 
@@ -26,52 +25,20 @@ func (cfg *apiConfig) searchJobs(w http.ResponseWriter, req *http.Request) {
 	}
 
 
-	if str != "" {
-		JobDb, err := cfg.DB.SearchJobs(req.Context(), sql.NullString{
-			String: str,
-			Valid:  true,
-		})
-		respBody := make([]jobs, 0, len(JobDb))
-		for _, dbjob := range JobDb {
-			jobResp := jobs{
-				ID: dbjob.ID,
-				CreatedAt: dbjob.CreatedAt,
-				UpdatedAt: dbjob.UpdatedAt,
-				Title: dbjob.Title,
-				Description: dbjob.Description,
-				Location: dbjob.Location,
-				Type: dbjob.Type,
-				Salary: dbjob.Salary,
-				EmployerID: dbjob.EmployerID,
-			}
-			respBody = append(respBody, jobResp)
-		}
-
-
-		data, err := json.Marshal(respBody)
-			if err != nil {
-				log.Printf("Error marshalling JSON: %s", err)
-				w.WriteHeader(500)
-				return
-			}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(200)
-		w.Write(data)
-		return
-	}	
-
-
-	JobDb, err := cfg.DB.GetAllJobs(req.Context())
+	JobDb, err := cfg.DB.SearchJobs(req.Context(), sql.NullString{
+		String: str,
+		Valid:  true,
+	})
 	if err != nil {
-    	http.Error(w, "Cannot Retrieve Jobs", http.StatusNotFound)
-        return
+		http.Error(w, "Cannot search the database", http.StatusNotFound)
+		return
 	}
 
+
 	respBody := make([]jobs, 0, len(JobDb))
-    for _, dbjob := range JobDb {
-        jobResp := jobs{
-           	ID: dbjob.ID,
+	for _, dbjob := range JobDb {
+		jobResp := jobs{
+			ID: dbjob.ID,
 			CreatedAt: dbjob.CreatedAt,
 			UpdatedAt: dbjob.UpdatedAt,
 			Title: dbjob.Title,
@@ -80,10 +47,9 @@ func (cfg *apiConfig) searchJobs(w http.ResponseWriter, req *http.Request) {
 			Type: dbjob.Type,
 			Salary: dbjob.Salary,
 			EmployerID: dbjob.EmployerID,
-        }
-        respBody = append(respBody, jobResp)
-    }
-
+		}
+		respBody = append(respBody, jobResp)
+	}
 
 	data, err := json.Marshal(respBody)
 		if err != nil {
@@ -91,9 +57,11 @@ func (cfg *apiConfig) searchJobs(w http.ResponseWriter, req *http.Request) {
 			w.WriteHeader(500)
 			return
 		}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(data)
-
+	return
+		
 	
 }
