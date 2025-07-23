@@ -58,8 +58,7 @@ Run migrations to set up tables:
 `goose postgres "postgres://<user>:<password>@<host>:<port>/<database>" up`
 
 📬 API Docs
-
-API documentation is available in the docs/ folder or via Postman collection.
+Full API documentation is available here: [Postman Docs](https://documenter.getpostman.com/view/123456-abcdef)  
 
 📜 License
 
