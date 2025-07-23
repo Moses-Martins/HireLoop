@@ -55,8 +55,7 @@ Server will be running at `http://localhost:<port>`
 🗄 Database
 
 Run migrations to set up tables:
-
-psql -U your_user -d hireloop -f migrations.sql
+`psql "postgres://<user>:<password>@<host>:<port>/<database>"`
 
 📬 API Docs
 
