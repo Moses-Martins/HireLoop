@@ -43,14 +43,15 @@ Create a .env file in the root directory of the project and then copy all the co
 
 
 📦 Install Dependencies
-
+```bash
 go mod tidy
-
+```
 🏃 Run Server
 ```bash
 go run main.go
 ```
-Server will be running at http://localhost:<port>
+Server will be running at `http://localhost:<port>`
+
 🗄 Database
 
 Run migrations to set up tables:
