@@ -48,7 +48,7 @@ go mod tidy
 ```
 🏃 Run Server
 ```bash
-go run main.go
+go build -o out && ./out
 ```
 Server will be running at `http://localhost:<port>`
 
@@ -60,6 +60,7 @@ Run migrations to set up tables:
 📬 API Docs
 
 API documentation is available in the docs/ folder or via Postman collection.
+
 📜 License
 
 MIT License.
