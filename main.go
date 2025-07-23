@@ -76,18 +76,11 @@ func main() {
 	fs := http.FileServer(http.Dir("./assets"))
     router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", fs))
 	router.HandleFunc("/api/auth/register", apiCfg.CreateUsers).Methods("POST")
-
-
 	router.HandleFunc("/api/auth/google/register", apiCfg.GoogleRegister).Methods("GET")
 	router.HandleFunc("/api/auth/google/register/callback", apiCfg.RegisterCallback).Methods("GET")
-
-
-
 	router.HandleFunc("/api/auth/login", apiCfg.Login).Methods("POST")
 	router.HandleFunc("/api/auth/google/login", apiCfg.GoogleLogin).Methods("GET")
 	router.HandleFunc("/api/auth/google/login/callback", apiCfg.LoginCallback).Methods("GET")
-
-
 	router.HandleFunc("/api/auth/me", apiCfg.Me).Methods("GET")
 	router.HandleFunc("/api/jobs", apiCfg.createJob).Methods("POST")
 	router.HandleFunc("/api/jobs", apiCfg.getAllJobs).Methods("GET")
