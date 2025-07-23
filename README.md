@@ -55,7 +55,7 @@ Server will be running at `http://localhost:<port>`
 🗄 Database
 
 Run migrations to set up tables:
-`psql "postgres://<user>:<password>@<host>:<port>/<database>"`
+`goose postgres "postgres://<user>:<password>@<host>:<port>/<database>" up`
 
 📬 API Docs
 
