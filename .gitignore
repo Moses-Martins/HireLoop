@@ -16,7 +16,6 @@
 
 # Environment variable files
 .env
-.env.*
 
 # Logs
 *.log
