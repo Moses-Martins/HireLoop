@@ -1,59 +1,45 @@
 package main
 
 import (
-	"net/http"
-	"encoding/json"
-	"log"
 	"github.com/Moses-Martins/HireLoop/internal/auth"
+	"net/http"
 )
-
-
 
 func (cfg *apiConfig) getAllJobs(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {
-		w.WriteHeader(401)
+		Send(w, 401, nil, "Invalid or missing token")
 		return
 	}
 
 	_, err = auth.ValidateJWT(token_string, cfg.JwtSecret)
 	if err != nil {
-		w.WriteHeader(401)
+		Send(w, 401, nil, "Invalid or missing token")
 		return
 	}
 
 	JobDb, err := cfg.DB.GetAllJobs(req.Context())
 	if err != nil {
-    	http.Error(w, "Cannot Retrieve Jobs", http.StatusNotFound)
-        return
+		Send(w, 404, nil, "Cannot Retrieve Jobs")
+		return
 	}
 
 	respBody := make([]jobs, 0, len(JobDb))
-    for _, dbjob := range JobDb {
-        jobResp := jobs{
-           	ID: dbjob.ID,
-			CreatedAt: dbjob.CreatedAt,
-			UpdatedAt: dbjob.UpdatedAt,
-			Title: dbjob.Title,
+	for _, dbjob := range JobDb {
+		jobResp := jobs{
+			ID:          dbjob.ID,
+			CreatedAt:   dbjob.CreatedAt,
+			UpdatedAt:   dbjob.UpdatedAt,
+			Title:       dbjob.Title,
 			Description: dbjob.Description,
-			Location: dbjob.Location,
-			Type: dbjob.Type,
-			Salary: dbjob.Salary,
-			EmployerID: dbjob.EmployerID,
-        }
-        respBody = append(respBody, jobResp)
-    }
-
-
-	data, err := json.Marshal(respBody)
-		if err != nil {
-			log.Printf("Error marshalling JSON: %s", err)
-			w.WriteHeader(500)
-			return
+			Location:    dbjob.Location,
+			Type:        dbjob.Type,
+			Salary:      dbjob.Salary,
+			EmployerID:  dbjob.EmployerID,
 		}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(data)
+		respBody = append(respBody, jobResp)
+	}
 
-	
+	Send(w, 200, respBody, "Jobs retrieved")
+
 }

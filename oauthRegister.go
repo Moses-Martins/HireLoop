@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"log"
 
 	"golang.org/x/oauth2"
 	"time"
@@ -30,14 +29,14 @@ func (cfg *apiConfig) RegisterCallback(w http.ResponseWriter, req *http.Request)
 
 	token, err := cfg.GoogleOauthConfig.Exchange(ctx, code)
 	if err != nil {
-		http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+		Send(w, 500, nil, "Failed to exchange token: "+err.Error())
 		return
 	}
 
 	client := cfg.GoogleOauthConfig.Client(ctx, token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
-		http.Error(w, "Failed to get user info: "+err.Error(), http.StatusInternalServerError)
+		Send(w, 500, nil, "Failed to get user info: "+err.Error())
 		return
 	}
 	defer resp.Body.Close()
@@ -47,80 +46,66 @@ func (cfg *apiConfig) RegisterCallback(w http.ResponseWriter, req *http.Request)
 		Name  string `json:"name"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
-		http.Error(w, "Failed to decode user info: "+err.Error(), http.StatusInternalServerError)
+		Send(w, 500, nil, "Failed to decode user info: "+err.Error())
 		return
 	}
 
 	hashedPass, err := auth.HashPassword("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
 	if err != nil {
-		log.Printf("Error Hashing Password: %s", err)
-		w.WriteHeader(500)
+		Send(w, 500, nil, "Error Hashing Password")
 		return
 	}
 
 	if userRole == "" {
-		http.Error(w, "Please specify the role you want to register for.", 400)
+		Send(w, 400, nil, "Please specify the role you want to register for.")
 		return
 	}
 
 	userRole, err = validateRole(userRole)
 	if err != nil {
-		w.WriteHeader(400)
-		w.Write([]byte(err.Error()))
+		Send(w, 400, nil, err.Error())
 		return
 	}
 
-    userDb, err := cfg.DB.CreateUser(req.Context(), database.CreateUserParams{		
-		Name:  userInfo.Name,  
-		Email:	userInfo.Email,
-		HashedPassword: hashedPass,    
-		Role:	userRole,
+	userDb, err := cfg.DB.CreateUser(req.Context(), database.CreateUserParams{
+		Name:           userInfo.Name,
+		Email:          userInfo.Email,
+		HashedPassword: hashedPass,
+		Role:           userRole,
 	})
 	if err != nil {
-		http.Error(w, "Cannot Create User", http.StatusNotFound)
+		Send(w, 404, nil, "Cannot Create User")
 		return
 	}
 
-	loginToken, err := auth.MakeJWT(userDb.ID, cfg.JwtSecret, time.Duration(3600) * time.Second)
+	loginToken, err := auth.MakeJWT(userDb.ID, cfg.JwtSecret, time.Duration(3600)*time.Second)
 	if err != nil {
-		log.Printf("Cannot generate token %s", err)
-		w.WriteHeader(500)
+		Send(w, 500, nil, "Cannot generate token")
 		return
 	}
 
 	refreshtoken, err := auth.MakeRefreshToken()
 	if err != nil {
-		log.Printf("Error generating Refresh Token: %s", err)
-		w.WriteHeader(500)
+		Send(w, 500, nil, "Error generating Refresh Token")
 		return
 	}
 
 	_, err = cfg.DB.CreateRefreshToken(req.Context(), database.CreateRefreshTokenParams{
-		Token: refreshtoken,
-		UserID: userDb.ID,
+		Token:     refreshtoken,
+		UserID:    userDb.ID,
 		ExpiresAt: time.Now().Add(60 * 24 * time.Hour),
 	})
 
 	respBody := UserDisplayed{
-		Name: userDb.Name,
-		CreatedAt: userDb.CreatedAt,
-		UpdatedAt: userDb.UpdatedAt,
-		Email: userDb.Email,
-		Role: userDb.Role,
-		Token: loginToken,
+		Name:         userDb.Name,
+		CreatedAt:    userDb.CreatedAt,
+		UpdatedAt:    userDb.UpdatedAt,
+		Email:        userDb.Email,
+		Role:         userDb.Role,
+		Token:        loginToken,
 		RefreshToken: refreshtoken,
 	}
 
-	data, err := json.Marshal(respBody)
-		if err != nil {
-			log.Printf("Error marshalling JSON: %s", err)
-			w.WriteHeader(500)
-			return
-		}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(data)
-	
+	Send(w, 200, respBody, "Google registration completed")
 
 }
-

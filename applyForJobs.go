@@ -1,92 +1,85 @@
 package main
 
 import (
-	"io"
-	"os"
-	"fmt"
-	"mime"
-	"strings"
 	"crypto/rand"
 	"encoding/base64"
-	"path/filepath"
-	"net/http"
-	"encoding/json"
-	"log"
-	"github.com/gorilla/mux"
-	"github.com/google/uuid"
+	"fmt"
 	"github.com/Moses-Martins/HireLoop/internal/auth"
 	"github.com/Moses-Martins/HireLoop/internal/database"
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
+	"io"
+	"mime"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 type applyJob struct {
-	ID uuid.UUID `json:"id"`
-    ApplicantID uuid.UUID `json:"applicant_id"`
-    JobID uuid.UUID `json:"job_id"`
-    ResumeUrl string `json:"resume_url"`
-    Status string `json:"status"`
+	ID          uuid.UUID `json:"id"`
+	ApplicantID uuid.UUID `json:"applicant_id"`
+	JobID       uuid.UUID `json:"job_id"`
+	ResumeUrl   string    `json:"resume_url"`
+	Status      string    `json:"status"`
 }
-
 
 func (cfg *apiConfig) applyForJobs(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {
-		w.WriteHeader(401)
+		Send(w, 401, nil, "Invalid or missing token")
 		return
 	}
 
 	ValidatedID, err := auth.ValidateJWT(token_string, cfg.JwtSecret)
 	if err != nil {
-		w.WriteHeader(401)
+		Send(w, 401, nil, "Invalid or missing token")
 		return
 	}
 
 	respBodyInitial, err := cfg.DB.GetUserByID(req.Context(), ValidatedID)
 	if err != nil {
-    	w.WriteHeader(401)
+		Send(w, 400, nil, "Cannot be processed")
 		return
 	}
 
 	if respBodyInitial.Role != "applicant" {
-		w.WriteHeader(400)
-		w.Write([]byte("Only Applicants can apply for a Job"))
+		Send(w, 400, nil, "Only Applicants can apply for a Job")
 		return
 	}
 
-	vars := mux.Vars(req)         
-    idStr := vars["id"]
+	vars := mux.Vars(req)
+	idStr := vars["id"]
 
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		http.Error(w, "Invalid UUID", http.StatusNotFound)
+		Send(w, 404, nil, "Invalid UUID")
 		return
 	}
 
 	respBody, err := cfg.DB.GetJobsByID(req.Context(), id)
 	if err != nil {
-		http.Error(w, "Cannot Retrieve Job", http.StatusNotFound)
+		Send(w, 404, nil, "Cannot Retrieve Job")
 		return
 	}
-
 
 	Applied, err := cfg.DB.ApplyJobs(req.Context(), database.ApplyJobsParams{
 		ApplicantID: ValidatedID,
-		JobID: respBody.ID,
-		ResumeUrl: "Not added yet",
-		Status: "Submitted",
+		JobID:       respBody.ID,
+		ResumeUrl:   "Not added yet",
+		Status:      "Submitted",
 	})
 	if err != nil {
-		http.Error(w, "Cannot Apply for Job", http.StatusNotFound)
+		Send(w, 404, nil, "Cannot Apply for Job")
 		return
 	}
 
-
 	const maxMemory = 10 << 20
 	req.ParseMultipartForm(maxMemory)
-	
+
 	file, header, err := req.FormFile("resume")
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Unable to parse form file"))
+		Send(w, 400, nil, "Unable to parse form file")
 		return
 	}
 
@@ -94,22 +87,18 @@ func (cfg *apiConfig) applyForJobs(w http.ResponseWriter, req *http.Request) {
 
 	contentType := header.Header.Get("Content-Type")
 	if contentType == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Missing Content-Type for resume"))
+		Send(w, 400, nil, "Missing Content-Type for resume")
 		return
 	}
-
 
 	mediatype, _, err := mime.ParseMediaType(contentType)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid Content-Type"))
+		Send(w, 400, nil, "Invalid Content-Type")
 		return
 	}
 
-	if (mediatype != "application/pdf") {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Cannot upload content of that type"))
+	if mediatype != "application/pdf" {
+		Send(w, 400, nil, "Cannot upload content of that type")
 		return
 	}
 
@@ -123,54 +112,40 @@ func (cfg *apiConfig) applyForJobs(w http.ResponseWriter, req *http.Request) {
 	filename := fmt.Sprintf("%s.%s", randomString, parts[1])
 	path := filepath.Join(cfg.assetsRoot, "/", filename)
 
-
 	file_dir, err := os.Create(path)
-    if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Cannot create file path"))
+	if err != nil {
+		Send(w, 500, nil, "Cannot create file path")
 		return
-    }
-    defer file_dir.Close()
+	}
+	defer file_dir.Close()
 
 	_, err = io.Copy(file_dir, file)
 
-
 	data_url := fmt.Sprintf("http://localhost:%s/assets/%s.%s", cfg.port, randomString, parts[1])
-		
 
 	err = cfg.DB.UpdateApplyJob(req.Context(), database.UpdateApplyJobParams{
 		ResumeUrl: data_url,
-		ID: Applied.ID,
+		ID:        Applied.ID,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Cannot update video"))
+		Send(w, 500, nil, "Cannot update video")
 		return
 	}
 
 	updated, err := cfg.DB.GetApplyJobs(req.Context(), Applied.ID)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Cannot get resume"))
+		Send(w, 500, nil, "Cannot get resume")
 		return
 	}
 
 	Resp := applyJob{
-		ID: updated.ID,
+		ID:          updated.ID,
 		ApplicantID: updated.ApplicantID,
-		JobID: updated.JobID,
-		ResumeUrl: updated.ResumeUrl,
-		Status:  updated.Status,
+		JobID:       updated.JobID,
+		ResumeUrl:   updated.ResumeUrl,
+		Status:      updated.Status,
 	}
 
-	data, err := json.Marshal(Resp)
-		if err != nil {
-			log.Printf("Error marshalling JSON: %s", err)
-			w.WriteHeader(500)
-			return
-		}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-	w.Write(data)
-	
+	Send(w, 201, Resp, "Job application submitted")
+
 }

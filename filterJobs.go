@@ -1,16 +1,12 @@
 package main
 
 import (
-	"net/http"
-	"encoding/json"
-	"log"
-	"strconv"
 	"database/sql"
 	"github.com/Moses-Martins/HireLoop/internal/auth"
 	"github.com/Moses-Martins/HireLoop/internal/database"
+	"net/http"
+	"strconv"
 )
-
-
 
 func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 	location := req.URL.Query().Get("location")
@@ -21,13 +17,11 @@ func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 	var err error
 	salaryMin := float32(1)
 	salaryMax := float32(1)
-	
 
 	if salaryMinStr != "" {
 		conv, err := strconv.ParseFloat(salaryMinStr, 32)
 		if err != nil {
-			// handle error, e.g., bad input
-			http.Error(w, "Invalid salary_min", http.StatusBadRequest)
+			Send(w, 400, nil, "Invalid salary_min")
 			return
 		}
 		salaryMin = float32(conv)
@@ -36,28 +30,26 @@ func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 	if salaryMaxStr != "" {
 		conv, err := strconv.ParseFloat(salaryMaxStr, 32)
 		if err != nil {
-			http.Error(w, "Invalid salary_max", http.StatusBadRequest)
+			Send(w, 400, nil, "Invalid salary_max")
 			return
 		}
 		salaryMax = float32(conv)
-	}	
-
+	}
 
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {
-		w.WriteHeader(401)
+		Send(w, 401, nil, "Invalid or missing token")
 		return
 	}
 
 	_, err = auth.ValidateJWT(token_string, cfg.JwtSecret)
 	if err != nil {
-		w.WriteHeader(401)
+		Send(w, 401, nil, "Invalid or missing token")
 		return
 	}
 
-
 	JobDb, err := cfg.DB.FiltersJobs(req.Context(), database.FiltersJobsParams{
-		Column1:  sql.NullString{
+		Column1: sql.NullString{
 			String: location,
 			Valid:  true,
 		},
@@ -66,36 +58,26 @@ func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 		Column4: salaryMax,
 	})
 	if err != nil {
-    	http.Error(w, "Cannot Retrieve Filtered Jobs", http.StatusNotFound)
-        return
+		Send(w, 404, nil, "Cannot Retrieve Filtered Jobs")
+		return
 	}
 
 	respBody := make([]jobs, 0, len(JobDb))
-    for _, dbjob := range JobDb {
-        jobResp := jobs{
-           	ID: dbjob.ID,
-			CreatedAt: dbjob.CreatedAt,
-			UpdatedAt: dbjob.UpdatedAt,
-			Title: dbjob.Title,
+	for _, dbjob := range JobDb {
+		jobResp := jobs{
+			ID:          dbjob.ID,
+			CreatedAt:   dbjob.CreatedAt,
+			UpdatedAt:   dbjob.UpdatedAt,
+			Title:       dbjob.Title,
 			Description: dbjob.Description,
-			Location: dbjob.Location,
-			Type: dbjob.Type,
-			Salary: dbjob.Salary,
-			EmployerID: dbjob.EmployerID,
-        }
-        respBody = append(respBody, jobResp)
-    }
-
-
-	data, err := json.Marshal(respBody)
-		if err != nil {
-			log.Printf("Error marshalling JSON: %s", err)
-			w.WriteHeader(500)
-			return
+			Location:    dbjob.Location,
+			Type:        dbjob.Type,
+			Salary:      dbjob.Salary,
+			EmployerID:  dbjob.EmployerID,
 		}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(data)
+		respBody = append(respBody, jobResp)
+	}
 
-	
+	Send(w, 200, respBody, "Jobs filtered")
+
 }
