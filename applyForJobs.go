@@ -8,12 +8,14 @@ import (
 	"github.com/Moses-Martins/HireLoop/internal/database"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"io"
 	"mime"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
+	"log"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+    "github.com/aws/aws-sdk-go-v2/config"
+    "github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 type applyJob struct {
@@ -25,6 +27,7 @@ type applyJob struct {
 }
 
 func (cfg *apiConfig) applyForJobs(w http.ResponseWriter, req *http.Request) {
+
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {
 		Send(w, 401, nil, "Invalid or missing token")
@@ -110,25 +113,38 @@ func (cfg *apiConfig) applyForJobs(w http.ResponseWriter, req *http.Request) {
 	randomString := base64.RawURLEncoding.EncodeToString(randomBytes)
 
 	filename := fmt.Sprintf("%s.%s", randomString, parts[1])
-	path := filepath.Join(cfg.assetsRoot, "/", filename)
 
-	file_dir, err := os.Create(path)
+
+	// Load AWS configuration
+	bucket := "hireloop-backend-bucket"
+	region := "eu-north-1"
+
+    AwsConfig, err := config.LoadDefaultConfig(req.Context(), config.WithRegion(region))
+    if err != nil {
+        Send(w, 500, nil, "failed to initialize AWS configuration")
+    }
+
+    client := s3.NewFromConfig(AwsConfig)
+
+	_, err = client.PutObject(req.Context(), &s3.PutObjectInput{
+        Bucket: aws.String(bucket),
+        Key:    aws.String(filename),
+        Body:   file,
+    })
+
 	if err != nil {
-		Send(w, 500, nil, "Cannot create file path")
-		return
-	}
-	defer file_dir.Close()
+        Send(w, 500, nil, "failed to upload file")
+    }
 
-	_, err = io.Copy(file_dir, file)
-
-	data_url := fmt.Sprintf("http://localhost:%s/assets/%s.%s", cfg.port, randomString, parts[1])
+	// Build the public URL
+    publicURL := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucket, region, filename)
 
 	err = cfg.DB.UpdateApplyJob(req.Context(), database.UpdateApplyJobParams{
-		ResumeUrl: data_url,
+		ResumeUrl: publicURL,
 		ID:        Applied.ID,
 	})
 	if err != nil {
-		Send(w, 500, nil, "Cannot update video")
+		Send(w, 500, nil, "Cannot update resume")
 		return
 	}
 
