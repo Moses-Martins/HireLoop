@@ -82,6 +82,8 @@ func main() {
 	router.HandleFunc("/api/auth/google/login", apiCfg.GoogleLogin).Methods("GET")
 	router.HandleFunc("/api/auth/google/login/callback", apiCfg.LoginCallback).Methods("GET")
 	router.HandleFunc("/api/auth/me", apiCfg.Me).Methods("GET")
+	router.HandleFunc("/api/refresh", apiCfg.RefreshHandler).Methods("POST")
+	router.HandleFunc("/api/revoke", apiCfg.RevokeHandler).Methods("POST")
 	router.HandleFunc("/api/jobs", apiCfg.createJob).Methods("POST")
 	router.HandleFunc("/api/jobs", apiCfg.getAllJobs).Methods("GET")
 	router.HandleFunc("/api/jobs/search", apiCfg.searchJobs).Methods("GET")
