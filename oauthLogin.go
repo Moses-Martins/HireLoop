@@ -12,14 +12,27 @@ import (
 	"github.com/Moses-Martins/HireLoop/internal/database"
 )
 
-// Handler to start OAuth2 login
+// GoogleLogin godoc
+// @Summary Start Google OAuth login
+// @Description Redirects the user to Google OAuth consent screen to login
+// @Tags auth
+// @Success 302 "Redirects to Google consent screen"
+// @Router /auth/google/login [get]
 func (cfg *apiConfig) GoogleLogin(w http.ResponseWriter, req *http.Request) {
 	cfg.GoogleOauthConfig.RedirectURL = cfg.LoginRedirectUrl
 	url := cfg.GoogleOauthConfig.AuthCodeURL("random-state-string", oauth2.AccessTypeOffline)
 	http.Redirect(w, req, url, http.StatusTemporaryRedirect)
 }
 
-// Handler to handle the callback from Google
+// LoginCallback godoc
+// @Summary Google OAuth login callback
+// @Description Handles Google OAuth callback, authenticates user, and returns JWT + refresh token
+// @Tags auth
+// @Param code query string true "OAuth authorization code from Google"
+// @Success 200 {object} UserDisplayed "User info with JWT and refresh token"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/google/login/callback [get]
 func (cfg *apiConfig) LoginCallback(w http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
 	code := req.URL.Query().Get("code")
@@ -82,5 +95,4 @@ func (cfg *apiConfig) LoginCallback(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Send(w, 200, respBody, "Google login completed")
-
 }

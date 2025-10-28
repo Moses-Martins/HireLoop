@@ -22,10 +22,20 @@ type RefreshToken struct {
 }
 
 
+// RefreshHandler godoc
+// @Summary Refresh JWT using refresh token
+// @Description Accepts a valid refresh token in the Authorization header and returns a new JWT
+// @Tags auth
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} RefreshToken "Returns new JWT token"
+// @Failure 401 {object} map[string]string "Invalid, missing, or expired refresh token"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /refresh [post]
 func (cfg *apiConfig) RefreshHandler(w http.ResponseWriter, req *http.Request) {
-	
+
 	token_string, err := auth.GetBearerToken(req.Header)
-    if err != nil {
+	if err != nil {
 		w.WriteHeader(401)
 		w.Write([]byte("missing authorization header"))
 		return
@@ -33,26 +43,24 @@ func (cfg *apiConfig) RefreshHandler(w http.ResponseWriter, req *http.Request) {
 
 	RefreshTokenDb, err := cfg.DB.GetRefreshTokens(req.Context())
 	if err != nil {
-    	http.Error(w, "Cannot Retrieve Refresh Tokens", http.StatusNotFound)
-        return
+		http.Error(w, "Cannot retrieve refresh tokens", http.StatusNotFound)
+		return
 	}
 
-
 	dbToStruct := make([]RefreshStruct, 0, len(RefreshTokenDb))
-    for _, dbToken := range RefreshTokenDb {
-        RefreshResp := RefreshStruct{
-            Token:        dbToken.Token,
-            CreatedAt: dbToken.CreatedAt,
-            UpdatedAt: dbToken.UpdatedAt,
-            UserID:      dbToken.UserID,
+	for _, dbToken := range RefreshTokenDb {
+		RefreshResp := RefreshStruct{
+			Token:     dbToken.Token,
+			CreatedAt: dbToken.CreatedAt,
+			UpdatedAt: dbToken.UpdatedAt,
+			UserID:    dbToken.UserID,
 			ExpiresAt: dbToken.ExpiresAt,
-        }
-        dbToStruct = append(dbToStruct, RefreshResp)
-
-    }
+		}
+		dbToStruct = append(dbToStruct, RefreshResp)
+	}
 
 	respBodyInitial, exist := findRefreshTokenByToken(dbToStruct, token_string)
-	if exist != true {
+	if !exist {
 		w.WriteHeader(401)
 		return
 	}
@@ -62,14 +70,14 @@ func (cfg *apiConfig) RefreshHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	UserData, err:= cfg.DB.GetUserByRefreshToken(req.Context(), respBodyInitial.Token)
+	UserData, err := cfg.DB.GetUserByRefreshToken(req.Context(), respBodyInitial.Token)
 	if err != nil {
 		log.Printf("Cannot generate new token %s", err)
 		w.WriteHeader(500)
 		return
 	}
 
-	token, err := auth.MakeJWT(UserData.ID, cfg.JwtSecret, time.Duration(3600) * time.Second)
+	token, err := auth.MakeJWT(UserData.ID, cfg.JwtSecret, time.Duration(3600)*time.Second)
 	if err != nil {
 		log.Printf("Cannot generate token %s", err)
 		w.WriteHeader(500)
@@ -79,18 +87,17 @@ func (cfg *apiConfig) RefreshHandler(w http.ResponseWriter, req *http.Request) {
 	respBody := RefreshToken{
 		Token: token,
 	}
-	
+
 	data, err := json.Marshal(respBody)
-		if err != nil {
-			log.Printf("Error marshalling JSON: %s", err)
-			w.WriteHeader(500)
-			return
-		}
+	if err != nil {
+		log.Printf("Error marshalling JSON: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(data)
-
-
 }
 
 

@@ -8,6 +8,20 @@ import (
 	"net/http"
 )
 
+
+// deleteJobByID godoc
+// @Summary Delete a job
+// @Description Delete a job by ID. Only the employer who created the job can delete it. Requires authentication.
+// @Tags jobs
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Job ID (UUID)"
+// @Success 204 {object} map[string]interface{} "Job deleted successfully"
+// @Failure 400 {object} map[string]string "Invalid UUID"
+// @Failure 401 {object} map[string]string "Invalid or missing token"
+// @Failure 403 {object} map[string]string "Forbidden: only creator can delete job"
+// @Failure 404 {object} map[string]string "Job not found"
+// @Router /jobs/{id} [delete]
 func (cfg *apiConfig) deleteJobByID(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	idStr := vars["id"]
@@ -41,5 +55,4 @@ func (cfg *apiConfig) deleteJobByID(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Send(w, 204, map[string]interface{}{}, "Job deleted")
-
 }

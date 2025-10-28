@@ -8,6 +8,17 @@ import (
 	"net/http"
 )
 
+// deleteApplication godoc
+// @Summary Withdraw a job application
+// @Description Allows an applicant to delete their own job application. Requires authentication.
+// @Tags applications
+// @Security ApiKeyAuth
+// @Param id path string true "Application ID (UUID)"
+// @Success 204 {object} map[string]interface{} "Application deleted"
+// @Failure 401 {object} map[string]string "Missing or invalid token"
+// @Failure 404 {object} map[string]string "Application not found or unauthorized"
+// @Failure 400 {object} map[string]string "Cannot process request"
+// @Router /applications/{id} [delete]
 func (cfg *apiConfig) deleteApplication(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {
@@ -30,20 +41,20 @@ func (cfg *apiConfig) deleteApplication(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	Body, err := cfg.DB.GetApplyJobs(req.Context(), id)
+	application, err := cfg.DB.GetApplyJobs(req.Context(), id)
 	if err != nil {
-		Send(w, 500, nil, "Cannot get Application")
+		Send(w, 500, nil, "Cannot get application")
 		return
 	}
 
-	if ValidatedID != Body.ApplicantID {
+	if ValidatedID != application.ApplicantID {
 		Send(w, 404, nil, "Only the applicant can withdraw their job application")
 		return
 	}
 
 	_, err = cfg.DB.DeleteAppByID(req.Context(), database.DeleteAppByIDParams{
-		ID:          Body.ID,
-		ApplicantID: Body.ApplicantID,
+		ID:          application.ID,
+		ApplicantID: application.ApplicantID,
 	})
 
 	if err != nil {
@@ -52,5 +63,4 @@ func (cfg *apiConfig) deleteApplication(w http.ResponseWriter, req *http.Request
 	}
 
 	Send(w, 204, map[string]interface{}{}, "Application deleted")
-
 }

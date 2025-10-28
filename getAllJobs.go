@@ -5,6 +5,17 @@ import (
 	"net/http"
 )
 
+
+// getAllJobs godoc
+// @Summary Get all jobs
+// @Description Retrieves all job listings. Requires authentication.
+// @Tags jobs
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {array} jobs "List of jobs"
+// @Failure 401 {object} map[string]string "Invalid or missing token"
+// @Failure 404 {object} map[string]string "Cannot retrieve jobs"
+// @Router /jobs [get]
 func (cfg *apiConfig) getAllJobs(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {
@@ -20,7 +31,7 @@ func (cfg *apiConfig) getAllJobs(w http.ResponseWriter, req *http.Request) {
 
 	JobDb, err := cfg.DB.GetAllJobs(req.Context())
 	if err != nil {
-		Send(w, 404, nil, "Cannot Retrieve Jobs")
+		Send(w, 404, nil, "Cannot retrieve jobs")
 		return
 	}
 
@@ -41,5 +52,4 @@ func (cfg *apiConfig) getAllJobs(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Send(w, 200, respBody, "Jobs retrieved")
-
 }

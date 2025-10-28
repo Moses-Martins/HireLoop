@@ -7,6 +7,17 @@ import (
 	"net/http"
 )
 
+// getAllApp godoc
+// @Summary Get all applications for a job
+// @Description Retrieve all applicants for a specific job. Only the employer who created the job can access this. Requires authentication.
+// @Tags applications
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Job ID (UUID)"
+// @Success 200 {array} applyJob "List of applications"
+// @Failure 401 {object} map[string]string "Missing or invalid token"
+// @Failure 404 {object} map[string]string "Job not found or access forbidden"
+// @Router /employers/{id}/applications [get]
 func (cfg *apiConfig) getAllApp(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {
@@ -29,35 +40,34 @@ func (cfg *apiConfig) getAllApp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	Body, err := cfg.DB.GetJobsByID(req.Context(), id)
+	jobBody, err := cfg.DB.GetJobsByID(req.Context(), id)
 	if err != nil {
-		Send(w, 404, nil, "Cannot Retrieve Job")
+		Send(w, 404, nil, "Cannot retrieve job")
 		return
 	}
 
-	if ValidatedID != Body.EmployerID {
-		Send(w, 404, nil, "Only Job Creators Can See Applicants of a Job")
+	if ValidatedID != jobBody.EmployerID {
+		Send(w, 404, nil, "Only job creators can see applicants for this job")
 		return
 	}
 
-	Applicants, err := cfg.DB.GetApplyByJobID(req.Context(), Body.ID)
+	applicants, err := cfg.DB.GetApplyByJobID(req.Context(), jobBody.ID)
 	if err != nil {
-		Send(w, 404, nil, "Cannot Retrieve All Applicants")
+		Send(w, 404, nil, "Cannot retrieve applicants")
 		return
 	}
 
-	respBody := make([]applyJob, 0, len(Applicants))
-	for _, app := range Applicants {
-		apps := applyJob{
+	respBody := make([]applyJob, 0, len(applicants))
+	for _, app := range applicants {
+		respBody = append(respBody, applyJob{
 			ID:          app.ID,
 			ApplicantID: app.ApplicantID,
 			JobID:       app.JobID,
 			ResumeUrl:   app.ResumeUrl,
 			Status:      app.Status,
-		}
-		respBody = append(respBody, apps)
+		})
 	}
 
 	Send(w, 200, respBody, "Applications retrieved")
-
 }
+

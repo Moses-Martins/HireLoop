@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"regexp"
 )
 
 type AcceptEmail struct {
@@ -24,6 +25,18 @@ type UserShown struct {
 	Role      string    `json:"role"`
 }
 
+
+// CreateUsers godoc
+// @Summary Register a new user
+// @Description Registers a new user with email, password, name, and role (applicant or employer). Email is validated for proper format.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param user body AcceptEmail true "User registration info"
+// @Success 201 {object} UserShown "User successfully registered"
+// @Failure 400 {object} map[string]string "Invalid request, role, or email format"
+// @Failure 500 {object} map[string]string "Internal server error or hashing failure"
+// @Router /api/auth/register [post]
 func (cfg *apiConfig) CreateUsers(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	params := AcceptEmail{}
@@ -34,9 +47,15 @@ func (cfg *apiConfig) CreateUsers(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	params.Email, err = validateEmail(params.Email)
+	if err != nil {
+		Send(w, 400, nil, err.Error())
+		return
+	}
+
 	params.Password, err = auth.HashPassword(params.Password)
 	if err != nil {
-		Send(w, 500, nil, "Error Hashing Password")
+		Send(w, 500, nil, "Error hashing password")
 		return
 	}
 
@@ -53,7 +72,7 @@ func (cfg *apiConfig) CreateUsers(w http.ResponseWriter, req *http.Request) {
 		Role:           params.Role,
 	})
 	if err != nil {
-		Send(w, 404, nil, "Cannot Create User")
+		Send(w, 500, nil, "Cannot create user")
 		return
 	}
 
@@ -65,7 +84,6 @@ func (cfg *apiConfig) CreateUsers(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Send(w, 201, respBody, "User registered")
-
 }
 
 func validateRole(role string) (string, error) {
@@ -77,4 +95,22 @@ func validateRole(role string) (string, error) {
 	default:
 		return "", errors.New("invalid role: must be 'employer' or 'applicant'")
 	}
+}
+
+
+
+// validateEmail checks if the provided email string is valid
+func validateEmail(email string) (string, error) {
+	email = strings.TrimSpace(email)
+	email = strings.ToLower(email)
+
+	// Basic RFC 5322 email regex
+	const emailRegexPattern = `^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$`
+	re := regexp.MustCompile(emailRegexPattern)
+
+	if !re.MatchString(email) {
+		return "", errors.New("invalid email format")
+	}
+
+	return email, nil
 }

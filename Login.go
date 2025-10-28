@@ -34,6 +34,18 @@ type UserDisplayed struct {
 	RefreshToken string    `json:"refresh_token"`
 }
 
+// Login godoc
+// @Summary Login with email and password
+// @Description Authenticates a user using email and password and returns JWT + refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param credentials body AcceptsEmail true "Email and password"
+// @Success 200 {object} UserDisplayed "Login successful, returns JWT and refresh token"
+// @Failure 401 {object} map[string]string "Incorrect password"
+// @Failure 404 {object} map[string]string "Email not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/login [post]
 func (cfg *apiConfig) Login(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	params := AcceptsEmail{}
@@ -46,7 +58,7 @@ func (cfg *apiConfig) Login(w http.ResponseWriter, req *http.Request) {
 
 	respBodyInitial, err := cfg.DB.GetUserByEmail(req.Context(), params.Email)
 	if err != nil {
-		Send(w, 500, nil, "Incorrect email (Email cannot be found)")
+		Send(w, 404, nil, "Incorrect email (Email cannot be found)")
 		return
 	}
 

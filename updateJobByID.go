@@ -9,6 +9,21 @@ import (
 	"net/http"
 )
 
+// updateJobByID godoc
+// @Summary Update a job
+// @Description Update an existing job. Only the employer who created the job can update it. Requires authentication.
+// @Tags jobs
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Job ID (UUID)"
+// @Param job body job true "Job details to update"
+// @Success 200 {object} jobs "Job updated successfully"
+// @Failure 400 {object} map[string]string "Invalid input or unauthorized"
+// @Failure 401 {object} map[string]string "Missing or invalid authentication token"
+// @Failure 403 {object} map[string]string "Forbidden: only creator can update job"
+// @Failure 404 {object} map[string]string "Job not found or cannot update"
+// @Router /jobs/{id} [put]
 func (cfg *apiConfig) updateJobByID(w http.ResponseWriter, req *http.Request) {
 
 	decoder := json.NewDecoder(req.Body)
@@ -43,7 +58,7 @@ func (cfg *apiConfig) updateJobByID(w http.ResponseWriter, req *http.Request) {
 
 	getJobs, err := cfg.DB.GetJobsByID(req.Context(), id)
 	if err != nil {
-		Send(w, 404, nil, "Cannot Retrieve Job")
+		Send(w, 404, nil, "Cannot retrieve job")
 		return
 	}
 
@@ -66,12 +81,12 @@ func (cfg *apiConfig) updateJobByID(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if respBodyInitial.Role != "employer" {
-		Send(w, 400, nil, "Only Employers can Update a Job")
+		Send(w, 400, nil, "Only employers can update a job")
 		return
 	}
 
 	if respBodyInitial.ID != getJobs.EmployerID {
-		Send(w, 400, nil, "You cannot update a job if you didn't create")
+		Send(w, 400, nil, "You cannot update a job you didn't create")
 		return
 	}
 
@@ -84,16 +99,15 @@ func (cfg *apiConfig) updateJobByID(w http.ResponseWriter, req *http.Request) {
 		ID:          id,
 	})
 	if err != nil {
-		Send(w, 404, nil, "Cannot Update Job")
+		Send(w, 404, nil, "Cannot update job")
 		return
 	}
 
 	respBody, err := cfg.DB.GetJobsByID(req.Context(), id)
 	if err != nil {
-		Send(w, 404, nil, "Cannot Retrieve Job")
+		Send(w, 404, nil, "Cannot retrieve job")
 		return
 	}
 
 	Send(w, 200, respBody, "Job updated")
-
 }

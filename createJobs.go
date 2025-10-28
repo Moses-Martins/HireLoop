@@ -32,6 +32,19 @@ type jobs struct {
 	EmployerID  uuid.UUID `json:"employer_id"`
 }
 
+// createJob godoc
+// @Summary Create a new job
+// @Description Creates a new job listing. Only users with role "employer" can create jobs.
+// @Tags jobs
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param job body job true "Job details"
+// @Success 201 {object} jobs "Job created successfully"
+// @Failure 400 {object} map[string]string "Invalid request or unauthorized role"
+// @Failure 401 {object} map[string]string "Invalid or missing token"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /jobs [post]
 func (cfg *apiConfig) createJob(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)
@@ -53,7 +66,7 @@ func (cfg *apiConfig) createJob(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if respBodyInitial.Role != "employer" {
-		Send(w, 400, nil, "Only Employers can Create a Job")
+		Send(w, 400, nil, "Only Employers can create a job")
 		return
 	}
 
@@ -87,7 +100,7 @@ func (cfg *apiConfig) createJob(w http.ResponseWriter, req *http.Request) {
 		EmployerID:  ValidatedID,
 	})
 	if err != nil {
-		Send(w, 404, nil, "Cannot Create Job")
+		Send(w, 404, nil, "Cannot create job")
 		return
 	}
 
@@ -104,7 +117,6 @@ func (cfg *apiConfig) createJob(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Send(w, 201, respBody, "Job created")
-
 }
 
 func validateFloat(value interface{}) (float32, error) {

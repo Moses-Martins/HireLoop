@@ -14,7 +14,13 @@ import (
 
 var userRole string
 
-// Handler to start OAuth2 Register
+// GoogleRegister godoc
+// @Summary Start Google OAuth registration
+// @Description Redirects the user to Google OAuth consent screen to register
+// @Tags auth
+// @Param role query string true "Role to register for (applicant or employer)"
+// @Success 302 "Redirects to Google consent screen"
+// @Router /auth/google/register [get]
 func (cfg *apiConfig) GoogleRegister(w http.ResponseWriter, req *http.Request) {
 	cfg.GoogleOauthConfig.RedirectURL = cfg.RegisterRedirectUrl
 	userRole = req.URL.Query().Get("role")
@@ -22,7 +28,15 @@ func (cfg *apiConfig) GoogleRegister(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, url, http.StatusTemporaryRedirect)
 }
 
-// Handler to handle the callback from Google
+// RegisterCallback godoc
+// @Summary Google OAuth registration callback
+// @Description Handles Google OAuth callback, creates user if necessary, and returns JWT + refresh token
+// @Tags auth
+// @Param code query string true "OAuth authorization code from Google"
+// @Success 200 {object} UserDisplayed "User info with JWT and refresh token"
+// @Failure 400 {object} map[string]string "Invalid request or missing role"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /auth/google/register/callback [get]
 func (cfg *apiConfig) RegisterCallback(w http.ResponseWriter, req *http.Request) {
 	ctx := context.Background()
 	code := req.URL.Query().Get("code")
@@ -107,5 +121,4 @@ func (cfg *apiConfig) RegisterCallback(w http.ResponseWriter, req *http.Request)
 	}
 
 	Send(w, 200, respBody, "Google registration completed")
-
 }

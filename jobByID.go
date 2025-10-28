@@ -7,6 +7,17 @@ import (
 	"net/http"
 )
 
+// getJobByID godoc
+// @Summary Get job by ID
+// @Description Retrieve a single job listing by its ID. Requires authentication.
+// @Tags jobs
+// @Produce json
+// @Security ApiKeyAuth
+// @Param id path string true "Job ID (UUID)"
+// @Success 200 {object} jobs "Job retrieved successfully"
+// @Failure 401 {object} map[string]string "Invalid or missing token"
+// @Failure 404 {object} map[string]string "Job not found or invalid UUID"
+// @Router /jobs/{id} [get]
 func (cfg *apiConfig) getJobByID(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)
@@ -32,10 +43,9 @@ func (cfg *apiConfig) getJobByID(w http.ResponseWriter, req *http.Request) {
 
 	respBody, err := cfg.DB.GetJobsByID(req.Context(), id)
 	if err != nil {
-		Send(w, 404, nil, "Cannot Retrieve Job")
+		Send(w, 404, nil, "Cannot retrieve job")
 		return
 	}
 
 	Send(w, 200, respBody, "Job retrieved")
-
 }

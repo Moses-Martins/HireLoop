@@ -6,6 +6,17 @@ import (
 	"net/http"
 )
 
+// searchJobs godoc
+// @Summary Search jobs
+// @Description Search job listings by keyword in title or description. Requires authentication.
+// @Tags jobs
+// @Produce json
+// @Security ApiKeyAuth
+// @Param keyword query string true "Keyword to search for"
+// @Success 200 {array} jobs "List of jobs matching keyword"
+// @Failure 401 {object} map[string]string "Invalid or missing token"
+// @Failure 404 {object} map[string]string "Cannot search the database"
+// @Router /jobs/search [get]
 func (cfg *apiConfig) searchJobs(w http.ResponseWriter, req *http.Request) {
 	str := req.URL.Query().Get("keyword")
 
@@ -47,5 +58,4 @@ func (cfg *apiConfig) searchJobs(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Send(w, 200, respBody, "Jobs retrieved")
-
 }

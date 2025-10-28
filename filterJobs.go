@@ -8,15 +8,30 @@ import (
 	"strconv"
 )
 
+// FilterJobs godoc
+// @Summary Filter jobs
+// @Description Filter job listings by location, type, and salary range. Requires authentication.
+// @Tags jobs
+// @Produce json
+// @Security ApiKeyAuth
+// @Param location query string false "Filter by location"
+// @Param type query string false "Filter by job type (full-time, part-time, freelance, contract)"
+// @Param salary_min query number false "Minimum salary"
+// @Param salary_max query number false "Maximum salary"
+// @Success 200 {array} jobs "Filtered list of jobs"
+// @Failure 400 {object} map[string]string "Invalid query parameters"
+// @Failure 401 {object} map[string]string "Invalid or missing token"
+// @Failure 404 {object} map[string]string "Cannot retrieve filtered jobs"
+// @Router /jobs/filter [get]
 func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 	location := req.URL.Query().Get("location")
 	jobType := req.URL.Query().Get("type")
 	salaryMinStr := req.URL.Query().Get("salary_min")
 	salaryMaxStr := req.URL.Query().Get("salary_max")
 
+	var salaryMin float32 = 1
+	var salaryMax float32 = 1
 	var err error
-	salaryMin := float32(1)
-	salaryMax := float32(1)
 
 	if salaryMinStr != "" {
 		conv, err := strconv.ParseFloat(salaryMinStr, 32)
@@ -58,7 +73,7 @@ func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 		Column4: salaryMax,
 	})
 	if err != nil {
-		Send(w, 404, nil, "Cannot Retrieve Filtered Jobs")
+		Send(w, 404, nil, "Cannot retrieve filtered jobs")
 		return
 	}
 
@@ -79,5 +94,4 @@ func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 	}
 
 	Send(w, 200, respBody, "Jobs filtered")
-
 }

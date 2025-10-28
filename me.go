@@ -16,6 +16,15 @@ type meStruct struct {
 	Role      string    `json:"role"`
 }
 
+// Me godoc
+// @Summary Get current user info
+// @Description Returns details of the currently authenticated user
+// @Tags auth
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} meStruct "User details retrieved"
+// @Failure 401 {object} map[string]string "Invalid or missing token"
+// @Router /auth/me [get]
 func (cfg *apiConfig) Me(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)

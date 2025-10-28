@@ -1,0 +1,824 @@
+definitions:
+  main.AcceptEmail:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+  main.AcceptsEmail:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  main.RefreshToken:
+    properties:
+      token:
+        type: string
+    type: object
+  main.UserDisplayed:
+    properties:
+      authorization_token:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      refresh_token:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  main.UserShown:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  main.applyJob:
+    properties:
+      applicant_id:
+        type: string
+      id:
+        type: string
+      job_id:
+        type: string
+      resume_url:
+        type: string
+      status:
+        type: string
+    type: object
+  main.job:
+    properties:
+      description:
+        type: string
+      location:
+        type: string
+      salary:
+        type: number
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  main.jobs:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      employer_id:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      salary:
+        type: number
+      title:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  main.meStruct:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@hireloop.com
+    name: API Support
+    url: http://www.hireloop.com/support
+  description: API for HireLoop job platform
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://example.com/terms/
+  title: HireLoop API
+  version: "1.0"
+paths:
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user with email, password, name, and role (applicant
+        or employer). Email is validated for proper format.
+      parameters:
+      - description: User registration info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.AcceptEmail'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User successfully registered
+          schema:
+            $ref: '#/definitions/main.UserShown'
+        "400":
+          description: Invalid request, role, or email format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error or hashing failure
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /applications/{id}:
+    delete:
+      description: Allows an applicant to delete their own job application. Requires
+        authentication.
+      parameters:
+      - description: Application ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Application deleted
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Cannot process request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Missing or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Application not found or unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Withdraw a job application
+      tags:
+      - applications
+    get:
+      description: Retrieve details of a single job application. Accessible only by
+        the applicant or the employer who posted the job. Requires authentication.
+      parameters:
+      - description: Application ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Application details
+          schema:
+            $ref: '#/definitions/main.applyJob'
+        "401":
+          description: Missing or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Application not found or unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a single job application
+      tags:
+      - applications
+  /auth/google/login:
+    get:
+      description: Redirects the user to Google OAuth consent screen to login
+      responses:
+        "302":
+          description: Redirects to Google consent screen
+      summary: Start Google OAuth login
+      tags:
+      - auth
+  /auth/google/login/callback:
+    get:
+      description: Handles Google OAuth callback, authenticates user, and returns
+        JWT + refresh token
+      parameters:
+      - description: OAuth authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User info with JWT and refresh token
+          schema:
+            $ref: '#/definitions/main.UserDisplayed'
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Google OAuth login callback
+      tags:
+      - auth
+  /auth/google/register:
+    get:
+      description: Redirects the user to Google OAuth consent screen to register
+      parameters:
+      - description: Role to register for (applicant or employer)
+        in: query
+        name: role
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Redirects to Google consent screen
+      summary: Start Google OAuth registration
+      tags:
+      - auth
+  /auth/google/register/callback:
+    get:
+      description: Handles Google OAuth callback, creates user if necessary, and returns
+        JWT + refresh token
+      parameters:
+      - description: OAuth authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User info with JWT and refresh token
+          schema:
+            $ref: '#/definitions/main.UserDisplayed'
+        "400":
+          description: Invalid request or missing role
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Google OAuth registration callback
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user using email and password and returns JWT +
+        refresh token
+      parameters:
+      - description: Email and password
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/main.AcceptsEmail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful, returns JWT and refresh token
+          schema:
+            $ref: '#/definitions/main.UserDisplayed'
+        "401":
+          description: Incorrect password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Email not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login with email and password
+      tags:
+      - auth
+  /auth/me:
+    get:
+      description: Returns details of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details retrieved
+          schema:
+            $ref: '#/definitions/main.meStruct'
+        "401":
+          description: Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get current user info
+      tags:
+      - auth
+  /employers/{id}/applications:
+    get:
+      description: Retrieve all applicants for a specific job. Only the employer who
+        created the job can access this. Requires authentication.
+      parameters:
+      - description: Job ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of applications
+          schema:
+            items:
+              $ref: '#/definitions/main.applyJob'
+            type: array
+        "401":
+          description: Missing or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Job not found or access forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all applications for a job
+      tags:
+      - applications
+  /jobs:
+    get:
+      description: Retrieves all job listings. Requires authentication.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of jobs
+          schema:
+            items:
+              $ref: '#/definitions/main.jobs'
+            type: array
+        "401":
+          description: Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Cannot retrieve jobs
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all jobs
+      tags:
+      - jobs
+    post:
+      consumes:
+      - application/json
+      description: Creates a new job listing. Only users with role "employer" can
+        create jobs.
+      parameters:
+      - description: Job details
+        in: body
+        name: job
+        required: true
+        schema:
+          $ref: '#/definitions/main.job'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Job created successfully
+          schema:
+            $ref: '#/definitions/main.jobs'
+        "400":
+          description: Invalid request or unauthorized role
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new job
+      tags:
+      - jobs
+  /jobs/{id}:
+    delete:
+      description: Delete a job by ID. Only the employer who created the job can delete
+        it. Requires authentication.
+      parameters:
+      - description: Job ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Job deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid UUID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: 'Forbidden: only creator can delete job'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Job not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a job
+      tags:
+      - jobs
+    get:
+      description: Retrieve a single job listing by its ID. Requires authentication.
+      parameters:
+      - description: Job ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Job retrieved successfully
+          schema:
+            $ref: '#/definitions/main.jobs'
+        "401":
+          description: Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Job not found or invalid UUID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get job by ID
+      tags:
+      - jobs
+    put:
+      consumes:
+      - application/json
+      description: Update an existing job. Only the employer who created the job can
+        update it. Requires authentication.
+      parameters:
+      - description: Job ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Job details to update
+        in: body
+        name: job
+        required: true
+        schema:
+          $ref: '#/definitions/main.job'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Job updated successfully
+          schema:
+            $ref: '#/definitions/main.jobs'
+        "400":
+          description: Invalid input or unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Missing or invalid authentication token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: 'Forbidden: only creator can update job'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Job not found or cannot update
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a job
+      tags:
+      - jobs
+  /jobs/{id}/apply:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Allows an applicant to apply for a job and upload a resume (PDF
+        only). Requires authentication.
+      parameters:
+      - description: Job ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Resume PDF file
+        in: formData
+        name: resume
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Job application submitted successfully
+          schema:
+            $ref: '#/definitions/main.applyJob'
+        "400":
+          description: Invalid input or role
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Missing or invalid token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Job not found or cannot apply
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Server error during upload or database operation
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Apply for a job
+      tags:
+      - applications
+  /jobs/filter:
+    get:
+      description: Filter job listings by location, type, and salary range. Requires
+        authentication.
+      parameters:
+      - description: Filter by location
+        in: query
+        name: location
+        type: string
+      - description: Filter by job type (full-time, part-time, freelance, contract)
+        in: query
+        name: type
+        type: string
+      - description: Minimum salary
+        in: query
+        name: salary_min
+        type: number
+      - description: Maximum salary
+        in: query
+        name: salary_max
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Filtered list of jobs
+          schema:
+            items:
+              $ref: '#/definitions/main.jobs'
+            type: array
+        "400":
+          description: Invalid query parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Cannot retrieve filtered jobs
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Filter jobs
+      tags:
+      - jobs
+  /jobs/search:
+    get:
+      description: Search job listings by keyword in title or description. Requires
+        authentication.
+      parameters:
+      - description: Keyword to search for
+        in: query
+        name: keyword
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of jobs matching keyword
+          schema:
+            items:
+              $ref: '#/definitions/main.jobs'
+            type: array
+        "401":
+          description: Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Cannot search the database
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Search jobs
+      tags:
+      - jobs
+  /refresh:
+    post:
+      description: Accepts a valid refresh token in the Authorization header and returns
+        a new JWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns new JWT token
+          schema:
+            $ref: '#/definitions/main.RefreshToken'
+        "401":
+          description: Invalid, missing, or expired refresh token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Refresh JWT using refresh token
+      tags:
+      - auth
+  /revoke:
+    post:
+      description: Revokes the provided refresh token from the Authorization header,
+        effectively logging the user out
+      responses:
+        "204":
+          description: Refresh token revoked successfully
+        "401":
+          description: Invalid, missing, or expired token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Revoke a refresh token
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
