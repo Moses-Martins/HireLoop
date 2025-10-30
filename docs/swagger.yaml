@@ -112,7 +112,7 @@ definitions:
       updated_at:
         type: string
     type: object
-host: localhost:8080
+host: hireloop.onrender.com
 info:
   contact:
     email: support@hireloop.com

@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "hireloop.onrender.com",
     "paths": {
         "/api/auth/register": {
             "post": {
