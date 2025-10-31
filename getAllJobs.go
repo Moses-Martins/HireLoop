@@ -15,7 +15,7 @@ import (
 // @Success 200 {array} jobs "List of jobs"
 // @Failure 401 {object} map[string]string "Invalid or missing token"
 // @Failure 404 {object} map[string]string "Cannot retrieve jobs"
-// @Router /jobs [get]
+// @Router /api/jobs [get]
 func (cfg *apiConfig) getAllJobs(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {

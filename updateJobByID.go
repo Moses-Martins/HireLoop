@@ -23,7 +23,7 @@ import (
 // @Failure 401 {object} map[string]string "Missing or invalid authentication token"
 // @Failure 403 {object} map[string]string "Forbidden: only creator can update job"
 // @Failure 404 {object} map[string]string "Job not found or cannot update"
-// @Router /jobs/{id} [put]
+// @Router /api/jobs/{id} [put]
 func (cfg *apiConfig) updateJobByID(w http.ResponseWriter, req *http.Request) {
 
 	decoder := json.NewDecoder(req.Body)

@@ -31,7 +31,6 @@ import (
 // @license.url https://opensource.org/licenses/MIT
 
 // @host hireloop.onrender.com
-// @basePath /api
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header

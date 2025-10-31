@@ -21,7 +21,7 @@ import (
 // @Failure 401 {object} map[string]string "Invalid or missing token"
 // @Failure 403 {object} map[string]string "Forbidden: only creator can delete job"
 // @Failure 404 {object} map[string]string "Job not found"
-// @Router /jobs/{id} [delete]
+// @Router /api/jobs/{id} [delete]
 func (cfg *apiConfig) deleteJobByID(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	idStr := vars["id"]

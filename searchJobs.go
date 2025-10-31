@@ -16,7 +16,7 @@ import (
 // @Success 200 {array} jobs "List of jobs matching keyword"
 // @Failure 401 {object} map[string]string "Invalid or missing token"
 // @Failure 404 {object} map[string]string "Cannot search the database"
-// @Router /jobs/search [get]
+// @Router /api/jobs/search [get]
 func (cfg *apiConfig) searchJobs(w http.ResponseWriter, req *http.Request) {
 	str := req.URL.Query().Get("keyword")
 

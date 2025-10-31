@@ -24,7 +24,7 @@ type meStruct struct {
 // @Security ApiKeyAuth
 // @Success 200 {object} meStruct "User details retrieved"
 // @Failure 401 {object} map[string]string "Invalid or missing token"
-// @Router /auth/me [get]
+// @Router /api/auth/me [get]
 func (cfg *apiConfig) Me(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)

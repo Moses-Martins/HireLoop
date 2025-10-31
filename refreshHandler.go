@@ -31,7 +31,7 @@ type RefreshToken struct {
 // @Success 200 {object} RefreshToken "Returns new JWT token"
 // @Failure 401 {object} map[string]string "Invalid, missing, or expired refresh token"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /refresh [post]
+// @Router /api/refresh [post]
 func (cfg *apiConfig) RefreshHandler(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)

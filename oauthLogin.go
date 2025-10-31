@@ -17,7 +17,7 @@ import (
 // @Description Redirects the user to Google OAuth consent screen to login
 // @Tags auth
 // @Success 302 "Redirects to Google consent screen"
-// @Router /auth/google/login [get]
+// @Router /api/auth/google/login [get]
 func (cfg *apiConfig) GoogleLogin(w http.ResponseWriter, req *http.Request) {
 	cfg.GoogleOauthConfig.RedirectURL = cfg.LoginRedirectUrl
 	url := cfg.GoogleOauthConfig.AuthCodeURL("random-state-string", oauth2.AccessTypeOffline)
