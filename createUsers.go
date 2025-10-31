@@ -36,7 +36,7 @@ type UserShown struct {
 // @Success 201 {object} UserShown "User successfully registered"
 // @Failure 400 {object} map[string]string "Invalid request, role, or email format"
 // @Failure 500 {object} map[string]string "Internal server error or hashing failure"
-// @Router /auth/register [post]
+// @Router /api/auth/register [post]
 func (cfg *apiConfig) CreateUsers(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	params := AcceptEmail{}

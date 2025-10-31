@@ -44,7 +44,7 @@ type jobs struct {
 // @Failure 400 {object} map[string]string "Invalid request or unauthorized role"
 // @Failure 401 {object} map[string]string "Invalid or missing token"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /jobs [post]
+// @Router /api/jobs [post]
 func (cfg *apiConfig) createJob(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)

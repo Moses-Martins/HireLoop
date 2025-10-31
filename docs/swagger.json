@@ -16,9 +16,8 @@
         "version": "1.0"
     },
     "host": "hireloop.onrender.com",
-    "basePath": "/api",
     "paths": {
-        "/applications/{id}": {
+        "/api/applications/{id}": {
             "get": {
                 "security": [
                     {
@@ -133,7 +132,7 @@
                 }
             }
         },
-        "/auth/google/login": {
+        "/api/auth/google/login": {
             "get": {
                 "description": "Redirects the user to Google OAuth consent screen to login",
                 "tags": [
@@ -147,51 +146,7 @@
                 }
             }
         },
-        "/auth/google/login/callback": {
-            "get": {
-                "description": "Handles Google OAuth callback, authenticates user, and returns JWT + refresh token",
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Google OAuth login callback",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "OAuth authorization code from Google",
-                        "name": "code",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User info with JWT and refresh token",
-                        "schema": {
-                            "$ref": "#/definitions/main.UserDisplayed"
-                        }
-                    },
-                    "404": {
-                        "description": "User not found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/google/register": {
+        "/api/auth/google/register": {
             "get": {
                 "description": "Redirects the user to Google OAuth consent screen to register",
                 "tags": [
@@ -214,51 +169,7 @@
                 }
             }
         },
-        "/auth/google/register/callback": {
-            "get": {
-                "description": "Handles Google OAuth callback, creates user if necessary, and returns JWT + refresh token",
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Google OAuth registration callback",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "OAuth authorization code from Google",
-                        "name": "code",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "User info with JWT and refresh token",
-                        "schema": {
-                            "$ref": "#/definitions/main.UserDisplayed"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request or missing role",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/login": {
+        "/api/auth/login": {
             "post": {
                 "description": "Authenticates a user using email and password and returns JWT + refresh token",
                 "consumes": [
@@ -319,7 +230,7 @@
                 }
             }
         },
-        "/auth/me": {
+        "/api/auth/me": {
             "get": {
                 "security": [
                     {
@@ -353,7 +264,7 @@
                 }
             }
         },
-        "/auth/register": {
+        "/api/auth/register": {
             "post": {
                 "description": "Registers a new user with email, password, name, and role (applicant or employer). Email is validated for proper format.",
                 "consumes": [
@@ -405,7 +316,7 @@
                 }
             }
         },
-        "/employers/{id}/applications": {
+        "/api/employers/{id}/applications": {
             "get": {
                 "security": [
                     {
@@ -460,7 +371,7 @@
                 }
             }
         },
-        "/jobs": {
+        "/api/jobs": {
             "get": {
                 "security": [
                     {
@@ -570,7 +481,7 @@
                 }
             }
         },
-        "/jobs/filter": {
+        "/api/jobs/filter": {
             "get": {
                 "security": [
                     {
@@ -651,7 +562,7 @@
                 }
             }
         },
-        "/jobs/search": {
+        "/api/jobs/search": {
             "get": {
                 "security": [
                     {
@@ -706,7 +617,7 @@
                 }
             }
         },
-        "/jobs/{id}": {
+        "/api/jobs/{id}": {
             "get": {
                 "security": [
                     {
@@ -907,7 +818,7 @@
                 }
             }
         },
-        "/jobs/{id}/apply": {
+        "/api/jobs/{id}/apply": {
             "post": {
                 "security": [
                     {
@@ -987,7 +898,7 @@
                 }
             }
         },
-        "/refresh": {
+        "/api/refresh": {
             "post": {
                 "security": [
                     {
@@ -1030,7 +941,7 @@
                 }
             }
         },
-        "/revoke": {
+        "/api/revoke": {
             "post": {
                 "security": [
                     {
@@ -1048,6 +959,94 @@
                     },
                     "401": {
                         "description": "Invalid, missing, or expired token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/google/login/callback": {
+            "get": {
+                "description": "Handles Google OAuth callback, authenticates user, and returns JWT + refresh token",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Google OAuth login callback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth authorization code from Google",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User info with JWT and refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/main.UserDisplayed"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/google/register/callback": {
+            "get": {
+                "description": "Handles Google OAuth callback, creates user if necessary, and returns JWT + refresh token",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Google OAuth registration callback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "OAuth authorization code from Google",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User info with JWT and refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/main.UserDisplayed"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request or missing role",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

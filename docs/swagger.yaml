@@ -1,4 +1,3 @@
-basePath: /api
 definitions:
   main.AcceptEmail:
     properties:
@@ -127,7 +126,7 @@ info:
   title: HireLoop API
   version: "1.0"
 paths:
-  /applications/{id}:
+  /api/applications/{id}:
     delete:
       description: Allows an applicant to delete their own job application. Requires
         authentication.
@@ -203,7 +202,7 @@ paths:
       summary: Get a single job application
       tags:
       - applications
-  /auth/google/login:
+  /api/auth/google/login:
     get:
       description: Redirects the user to Google OAuth consent screen to login
       responses:
@@ -212,37 +211,7 @@ paths:
       summary: Start Google OAuth login
       tags:
       - auth
-  /auth/google/login/callback:
-    get:
-      description: Handles Google OAuth callback, authenticates user, and returns
-        JWT + refresh token
-      parameters:
-      - description: OAuth authorization code from Google
-        in: query
-        name: code
-        required: true
-        type: string
-      responses:
-        "200":
-          description: User info with JWT and refresh token
-          schema:
-            $ref: '#/definitions/main.UserDisplayed'
-        "404":
-          description: User not found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Google OAuth login callback
-      tags:
-      - auth
-  /auth/google/register:
+  /api/auth/google/register:
     get:
       description: Redirects the user to Google OAuth consent screen to register
       parameters:
@@ -257,37 +226,7 @@ paths:
       summary: Start Google OAuth registration
       tags:
       - auth
-  /auth/google/register/callback:
-    get:
-      description: Handles Google OAuth callback, creates user if necessary, and returns
-        JWT + refresh token
-      parameters:
-      - description: OAuth authorization code from Google
-        in: query
-        name: code
-        required: true
-        type: string
-      responses:
-        "200":
-          description: User info with JWT and refresh token
-          schema:
-            $ref: '#/definitions/main.UserDisplayed'
-        "400":
-          description: Invalid request or missing role
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Google OAuth registration callback
-      tags:
-      - auth
-  /auth/login:
+  /api/auth/login:
     post:
       consumes:
       - application/json
@@ -328,7 +267,7 @@ paths:
       summary: Login with email and password
       tags:
       - auth
-  /auth/me:
+  /api/auth/me:
     get:
       description: Returns details of the currently authenticated user
       produces:
@@ -349,7 +288,7 @@ paths:
       summary: Get current user info
       tags:
       - auth
-  /auth/register:
+  /api/auth/register:
     post:
       consumes:
       - application/json
@@ -384,7 +323,7 @@ paths:
       summary: Register a new user
       tags:
       - auth
-  /employers/{id}/applications:
+  /api/employers/{id}/applications:
     get:
       description: Retrieve all applicants for a specific job. Only the employer who
         created the job can access this. Requires authentication.
@@ -420,7 +359,7 @@ paths:
       summary: Get all applications for a job
       tags:
       - applications
-  /jobs:
+  /api/jobs:
     get:
       description: Retrieves all job listings. Requires authentication.
       produces:
@@ -491,7 +430,7 @@ paths:
       summary: Create a new job
       tags:
       - jobs
-  /jobs/{id}:
+  /api/jobs/{id}:
     delete:
       description: Delete a job by ID. Only the employer who created the job can delete
         it. Requires authentication.
@@ -623,7 +562,7 @@ paths:
       summary: Update a job
       tags:
       - jobs
-  /jobs/{id}/apply:
+  /api/jobs/{id}/apply:
     post:
       consumes:
       - multipart/form-data
@@ -676,7 +615,7 @@ paths:
       summary: Apply for a job
       tags:
       - applications
-  /jobs/filter:
+  /api/jobs/filter:
     get:
       description: Filter job listings by location, type, and salary range. Requires
         authentication.
@@ -729,7 +668,7 @@ paths:
       summary: Filter jobs
       tags:
       - jobs
-  /jobs/search:
+  /api/jobs/search:
     get:
       description: Search job listings by keyword in title or description. Requires
         authentication.
@@ -765,7 +704,7 @@ paths:
       summary: Search jobs
       tags:
       - jobs
-  /refresh:
+  /api/refresh:
     post:
       description: Accepts a valid refresh token in the Authorization header and returns
         a new JWT
@@ -793,7 +732,7 @@ paths:
       summary: Refresh JWT using refresh token
       tags:
       - auth
-  /revoke:
+  /api/revoke:
     post:
       description: Revokes the provided refresh token from the Authorization header,
         effectively logging the user out
@@ -815,6 +754,66 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Revoke a refresh token
+      tags:
+      - auth
+  /auth/google/login/callback:
+    get:
+      description: Handles Google OAuth callback, authenticates user, and returns
+        JWT + refresh token
+      parameters:
+      - description: OAuth authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User info with JWT and refresh token
+          schema:
+            $ref: '#/definitions/main.UserDisplayed'
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Google OAuth login callback
+      tags:
+      - auth
+  /auth/google/register/callback:
+    get:
+      description: Handles Google OAuth callback, creates user if necessary, and returns
+        JWT + refresh token
+      parameters:
+      - description: OAuth authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      responses:
+        "200":
+          description: User info with JWT and refresh token
+          schema:
+            $ref: '#/definitions/main.UserDisplayed'
+        "400":
+          description: Invalid request or missing role
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Google OAuth registration callback
       tags:
       - auth
 securityDefinitions:
