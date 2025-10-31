@@ -20,7 +20,7 @@ var userRole string
 // @Tags auth
 // @Param role query string true "Role to register for (applicant or employer)"
 // @Success 302 "Redirects to Google consent screen"
-// @Router /api/auth/google/register [get]
+// @Router /auth/google/register [get]
 func (cfg *apiConfig) GoogleRegister(w http.ResponseWriter, req *http.Request) {
 	cfg.GoogleOauthConfig.RedirectURL = cfg.RegisterRedirectUrl
 	userRole = req.URL.Query().Get("role")

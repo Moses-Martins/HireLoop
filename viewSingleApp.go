@@ -17,7 +17,7 @@ import (
 // @Failure 401 {object} map[string]string "Missing or invalid token"
 // @Failure 404 {object} map[string]string "Application not found or unauthorized"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/applications/{id} [get]
+// @Router /applications/{id} [get]
 func (cfg *apiConfig) viewSingleApp(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {

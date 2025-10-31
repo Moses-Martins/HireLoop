@@ -17,7 +17,7 @@ import (
 // @Success 200 {array} applyJob "List of applications"
 // @Failure 401 {object} map[string]string "Missing or invalid token"
 // @Failure 404 {object} map[string]string "Job not found or access forbidden"
-// @Router /api/employers/{id}/applications [get]
+// @Router /employers/{id}/applications [get]
 func (cfg *apiConfig) getAllApp(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {

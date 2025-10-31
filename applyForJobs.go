@@ -39,7 +39,7 @@ type applyJob struct {
 // @Failure 401 {object} map[string]string "Missing or invalid token"
 // @Failure 404 {object} map[string]string "Job not found or cannot apply"
 // @Failure 500 {object} map[string]string "Server error during upload or database operation"
-// @Router /api/jobs/{id}/apply [post]
+// @Router /jobs/{id}/apply [post]
 func (cfg *apiConfig) applyForJobs(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)

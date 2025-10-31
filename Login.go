@@ -45,7 +45,7 @@ type UserDisplayed struct {
 // @Failure 401 {object} map[string]string "Incorrect password"
 // @Failure 404 {object} map[string]string "Email not found"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/auth/login [post]
+// @Router /auth/login [post]
 func (cfg *apiConfig) Login(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	params := AcceptsEmail{}

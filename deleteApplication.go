@@ -18,7 +18,7 @@ import (
 // @Failure 401 {object} map[string]string "Missing or invalid token"
 // @Failure 404 {object} map[string]string "Application not found or unauthorized"
 // @Failure 400 {object} map[string]string "Cannot process request"
-// @Router /api/applications/{id} [delete]
+// @Router /applications/{id} [delete]
 func (cfg *apiConfig) deleteApplication(w http.ResponseWriter, req *http.Request) {
 	token_string, err := auth.GetBearerToken(req.Header)
 	if err != nil {

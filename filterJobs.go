@@ -22,7 +22,7 @@ import (
 // @Failure 400 {object} map[string]string "Invalid query parameters"
 // @Failure 401 {object} map[string]string "Invalid or missing token"
 // @Failure 404 {object} map[string]string "Cannot retrieve filtered jobs"
-// @Router /api/jobs/filter [get]
+// @Router /jobs/filter [get]
 func (cfg *apiConfig) FilterJobs(w http.ResponseWriter, req *http.Request) {
 	location := req.URL.Query().Get("location")
 	jobType := req.URL.Query().Get("type")

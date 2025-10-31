@@ -1,3 +1,4 @@
+basePath: /api
 definitions:
   main.AcceptEmail:
     properties:
@@ -126,41 +127,6 @@ info:
   title: HireLoop API
   version: "1.0"
 paths:
-  /api/auth/register:
-    post:
-      consumes:
-      - application/json
-      description: Registers a new user with email, password, name, and role (applicant
-        or employer). Email is validated for proper format.
-      parameters:
-      - description: User registration info
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/main.AcceptEmail'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: User successfully registered
-          schema:
-            $ref: '#/definitions/main.UserShown'
-        "400":
-          description: Invalid request, role, or email format
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error or hashing failure
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Register a new user
-      tags:
-      - auth
   /applications/{id}:
     delete:
       description: Allows an applicant to delete their own job application. Requires
@@ -381,6 +347,41 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get current user info
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user with email, password, name, and role (applicant
+        or employer). Email is validated for proper format.
+      parameters:
+      - description: User registration info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.AcceptEmail'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User successfully registered
+          schema:
+            $ref: '#/definitions/main.UserShown'
+        "400":
+          description: Invalid request, role, or email format
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error or hashing failure
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
       tags:
       - auth
   /employers/{id}/applications:

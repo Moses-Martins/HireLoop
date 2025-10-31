@@ -17,7 +17,7 @@ import (
 // @Success 200 {object} jobs "Job retrieved successfully"
 // @Failure 401 {object} map[string]string "Invalid or missing token"
 // @Failure 404 {object} map[string]string "Job not found or invalid UUID"
-// @Router /api/jobs/{id} [get]
+// @Router /jobs/{id} [get]
 func (cfg *apiConfig) getJobByID(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)

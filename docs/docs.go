@@ -24,58 +24,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth/register": {
-            "post": {
-                "description": "Registers a new user with email, password, name, and role (applicant or employer). Email is validated for proper format.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Register a new user",
-                "parameters": [
-                    {
-                        "description": "User registration info",
-                        "name": "user",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/main.AcceptEmail"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "User successfully registered",
-                        "schema": {
-                            "$ref": "#/definitions/main.UserShown"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request, role, or email format",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error or hashing failure",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/applications/{id}": {
             "get": {
                 "security": [
@@ -401,6 +349,58 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Invalid or missing token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Registers a new user with email, password, name, and role (applicant or employer). Email is validated for proper format.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User registration info",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.AcceptEmail"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User successfully registered",
+                        "schema": {
+                            "$ref": "#/definitions/main.UserShown"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, role, or email format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error or hashing failure",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1263,7 +1263,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "hireloop.onrender.com",
-	BasePath:         "",
+	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "HireLoop API",
 	Description:      "API for HireLoop job platform",

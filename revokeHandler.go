@@ -15,7 +15,7 @@ import(
 // @Success 204 "Refresh token revoked successfully"
 // @Failure 401 {object} map[string]string "Invalid, missing, or expired token"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/revoke [post]
+// @Router /revoke [post]
 func (cfg *apiConfig) RevokeHandler(w http.ResponseWriter, req *http.Request) {
 
 	token_string, err := auth.GetBearerToken(req.Header)
