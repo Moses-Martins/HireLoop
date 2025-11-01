@@ -59,7 +59,7 @@ Run migrations to set up tables:
 
 📬 API Docs
 
-Full API documentation is available here: [Postman Docs](https://documenter.getpostman.com/view/11633114/2sB34mjJvU)  
+Full API documentation is available here: [Swagger](https://hireloop.onrender.com/swagger/index.html)  
 
 📜 License
 
